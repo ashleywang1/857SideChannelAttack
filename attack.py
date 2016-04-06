@@ -3,6 +3,7 @@ import gmpy2
 import sys
 import math
 import json
+import statistics
 
 n = 1024
 R = 2**(n//2)
@@ -83,11 +84,12 @@ def main():
         gap = compute_gap(g, i, Rinv, 512, N)
         #   TODO: based on gap, decide whether bit (512 - i) is 0 or 1, and
         #   update g accordingly
+        # g = 
         print(hex(g))
     # brute-force last 16 bits
     for i in range(2**16):
         q = g + i
-        if False:    #   TODO: check if this is a valid q
+        if False:    #   TODO: check if this is a valid q - see if it's a factor of N
             submit_guess(q)
 
 #   compute the gap for a given guess `g` (assuming the top `i` bits are
@@ -96,7 +98,20 @@ def compute_gap(g, i, Rinv, n, N):
     #   TODO: compute `g_hi`, `u_g`, and `u_{g_hi}` as in [BB05] Section 3, take
     #   average time over neighborhoods (n = 50 is a good starting point) for
     #   `u_g` and `u_{g_hi}`, and compute the gap
-    pass
+    zeroTimes = []
+    oneTimes = []
+    for val in range(n): # search over neighborhoods
+        g_hi = g+2**(511-i)
+        u_g = (g*Rinv) % N
+        u_ghi = (g_hi*Rinv) % N
+        t0 = time_decrypt(u_g)
+        t1 = time_decrypt(u_ghi)
+        zeroTimes.append(t0)
+        oneTimes.append(t1)
+        g += 1
+    # TODO run time_decrypt multiple times for more accuracy.
+    gap = math.abs(statistics.mean(zeroTimes) - statistics.mean(oneTimes))
+    return gap
 
 #   hex-encode a ciphertext and send it to the server for decryption
 #   returns the simulated time the decryption took
