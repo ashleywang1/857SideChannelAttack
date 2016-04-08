@@ -11,7 +11,8 @@ R = 2**(n//2)
 
 
 SERVER_URL = "http://6857rsa.csail.mit.edu:8080"
-TEAM = "ashwang_agrinman_jfuchs" #"PRACTICE_e379b00cc8419558" {'q': 11025094470338426821720756498425636955351102546725000286856098847019322664710568436829718306048234163420828797497554885799420444544318532184355060400821717L, 'p': 11979456514100210033328730104205955676864901645531389135341418641823753753671256716933138982060343272711421407553399840807340546364393166736184068917978487L, 'team': u'PRACTICE_e379b00cc8419558'}
+TEAM = "ashwang_agrinman_jfuchs" 
+#"PRACTICE_e379b00cc8419558" {'q': 11025094470338426821720756498425636955351102546725000286856098847019322664710568436829718306048234163420828797497554885799420444544318532184355060400821717L, 'p': 11979456514100210033328730104205955676864901645531389135341418641823753753671256716933138982060343272711421407553399840807340546364393166736184068917978487L, 'team': u'PRACTICE_e379b00cc8419558'}
 
 #
 #   Dependency Notes:
@@ -83,20 +84,20 @@ def main():
     g = 0
     for i in range(512-16):
         gap = compute_gap(g, i, Rinv, 50, N) #50 used to be 512
-        #   TODO: based on gap, decide whether bit (512 - i) is 0 or 1, and
+        #   based on gap, decide whether bit (512 - i) is 0 or 1, and
         #   update g accordingly
-        # g = 
-        print gap
-        if gap < 500: #bit i is a 0
+        if gap < 500: # large gap indicates bit i is a 1
             g += 2**(511-i)
         # print(hex(g))
-        print("{0:b}".format(g))
     # brute-force last 16 bits
     for i in range(2**16):
         q = g + i
         if prime.isMillerRabinPrime(q):
             if prime.isMillerRabinPrime(N/q):    #   TODO: check if this is a valid q - see if it's a factor of N
-                submit_guess(q)
+                if N/q < q:
+                    submit_guess(N/q)
+                else:
+                    submit_guess(q)
 
 #   compute the gap for a given guess `g` (assuming the top `i` bits are
 #   correct)
@@ -148,7 +149,7 @@ def gen_practice_key():
 #   hex-encodes q and sends it to the server, printing the result
 def submit_guess(q):
     #   convert q to hex and remove '0x' at beginning
-    data = {"team": TEAM, "q": hex(q)[2:]}
+    data = {"team": TEAM, "q": hex(q)[2:-1]}
     r = requests.post(SERVER_URL + "/guess", data=json.dumps(data))
     print(r.text)
 
