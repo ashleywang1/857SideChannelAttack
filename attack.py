@@ -4,13 +4,14 @@ import sys
 import math
 import json
 import statistics
+import prime
 
 n = 1024
 R = 2**(n//2)
 
 
 SERVER_URL = "http://6857rsa.csail.mit.edu:8080"
-TEAM = "staff"
+TEAM = "ashwang_agrinman_jfuchs" #"PRACTICE_e379b00cc8419558" {'q': 11025094470338426821720756498425636955351102546725000286856098847019322664710568436829718306048234163420828797497554885799420444544318532184355060400821717L, 'p': 11979456514100210033328730104205955676864901645531389135341418641823753753671256716933138982060343272711421407553399840807340546364393166736184068917978487L, 'team': u'PRACTICE_e379b00cc8419558'}
 
 #
 #   Dependency Notes:
@@ -81,16 +82,21 @@ def main():
     #   guess each time. Repeat this for the (512-16) most significant bits of q
     g = 0
     for i in range(512-16):
-        gap = compute_gap(g, i, Rinv, 512, N)
+        gap = compute_gap(g, i, Rinv, 50, N) #50 used to be 512
         #   TODO: based on gap, decide whether bit (512 - i) is 0 or 1, and
         #   update g accordingly
         # g = 
-        print(hex(g))
+        print gap
+        if gap < 500: #bit i is a 0
+            g += 2**(511-i)
+        # print(hex(g))
+        print("{0:b}".format(g))
     # brute-force last 16 bits
     for i in range(2**16):
         q = g + i
-        if False:    #   TODO: check if this is a valid q - see if it's a factor of N
-            submit_guess(q)
+        if prime.isMillerRabinPrime(q):
+            if prime.isMillerRabinPrime(N/q):    #   TODO: check if this is a valid q - see if it's a factor of N
+                submit_guess(q)
 
 #   compute the gap for a given guess `g` (assuming the top `i` bits are
 #   correct)
@@ -109,8 +115,7 @@ def compute_gap(g, i, Rinv, n, N):
         zeroTimes.append(t0)
         oneTimes.append(t1)
         g += 1
-    # TODO run time_decrypt multiple times for more accuracy.
-    gap = math.abs(statistics.mean(zeroTimes) - statistics.mean(oneTimes))
+    gap = abs(statistics.mean(zeroTimes) - statistics.mean(oneTimes))
     return gap
 
 #   hex-encode a ciphertext and send it to the server for decryption
@@ -149,3 +154,4 @@ def submit_guess(q):
 
 if __name__ == "__main__":
     main()
+    # print gen_practice_key()
