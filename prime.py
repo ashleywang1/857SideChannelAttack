@@ -1,4 +1,5 @@
 # primality testing
+# Taken from http://ideone.com/Qf9ZNG.
  
 from random import randint
 from fractions import gcd
@@ -129,10 +130,3 @@ def prevPrime(n):
     while not isBaillieWagstaffPrime(n): # or MillerRabin
         n -= gap[n%30]
     return n
-
-# print isMillerRabinPrime(2**89-1)
-# print isStandardLucasPseudoprime(2**89-1)
-# print isStrongLucasPseudoprime(2**89-1)
-# print isBaillieWagstaffPrime(2**89-1)
-# print nextPrime(10**301) - 10**301
-# print 10**301 - prevPrime(10**301)
